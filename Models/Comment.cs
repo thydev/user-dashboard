@@ -14,5 +14,18 @@ namespace userdb.Models
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
+        public string Duration {
+            get {
+                double min = DateTime.Now.Subtract(this.CreatedAt).TotalMinutes;
+                if ( min < 60 ) return $"{(int)min} minutes ago";
+
+                double hrs = DateTime.Now.Subtract(this.CreatedAt).TotalHours;
+                if ( hrs < 24 ) return $"{(int)hrs} hours ago";
+
+                double days = DateTime.Now.Subtract(this.CreatedAt).TotalDays;
+                return $"{(int)days} days ago";
+            }
+        }
     }
 }

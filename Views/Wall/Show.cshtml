@@ -1,0 +1,55 @@
+
+@{
+    ViewData["Title"] = "Leave a message";
+}
+
+<hr />
+<div class="container wells wells-sm">
+    <div class="row">
+        <h2>@ViewBag.User.FullName</h2>
+        <p>Registered at: @ViewBag.User.CreatedAt</p>
+        <p>Email: @ViewBag.User.Email</p>
+        <p>Description: @ViewBag.User.Description</p>
+    </div>
+
+    <div class="row">
+        <h4>Leave @ViewBag.User.FullName a message:</h4>
+        <form asp-controller="Wall" asp-action="PostMessage" method="post">
+            <input type="hidden" name="UserId" value="@ViewBag.User.UserId" />
+            <textarea name="message" id="message" cols="30" rows="3"></textarea>
+            <br>
+            <button type="submit">Post a message</button>
+        </form>
+    </div>
+
+    <div class="row">
+        <div class="display-messages">
+
+        @foreach(var message in @ViewBag.User.ReceivedMessages) {
+            <div class="message">
+                <p class="title"><a asp-controller="Wall" asp-action="ShowUser" asp-route-UserId="@message.Sender.UserId">@message.Sender.FullName</a> - @message.Duration </p>
+                <p class="text">@message.MessageText</p>
+            </div>
+            @foreach (var comment in @message.Comments)
+            {
+                <div class="comment">
+                    <p class="title"><a asp-controller="Wall" asp-action="ShowUser" asp-route-UserId="@comment.User.UserId">@comment.User.FullName</a> - @comment.Duration</p>
+                    <p class="text">@comment.CommentText</p>
+                </div>
+                
+            }
+            <div class="post">
+                <p>Post a comment</p>
+                <form asp-controller="Wall" asp-action="PostComment" method="POST">
+                    <input type="hidden" name="MessageId" value="@message.MessageId">
+                    <input type="hidden" name="UserId" value="@ViewBag.User.UserId" />
+                    <textarea name="comment" class="comment" cols="30" rows="3"></textarea>
+                    <input type="submit" value="Post a comment" class="btn-post">
+                </form>
+            </div>
+        }
+
+        </div>
+    </div>
+</div>
+

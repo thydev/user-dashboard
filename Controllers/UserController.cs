@@ -175,16 +175,16 @@ namespace userdb.Controllers
             return View("Dashboard");
         }
         
-        [HttpGet]
-        [Route("users/show/{UserId}")]
-        public IActionResult Show(int UserId)
-        {
-            if (!IsUserLoggedIn()) return RedirectToAction("Login", "User");
+        // [HttpGet]
+        // [Route("users/show/{UserId}")]
+        // public IActionResult Show(int UserId)
+        // {
+        //     if (!IsUserLoggedIn()) return RedirectToAction("Login", "User");
 
-            User TheUser = _context.Users.SingleOrDefault(r => r.UserId == UserId);
-            ViewBag.User = TheUser;
-            return View("Show");
-        }
+        //     User TheUser = _context.Users.SingleOrDefault(r => r.UserId == UserId);
+        //     ViewBag.User = TheUser;
+        //     return View("Show");
+        // }
 
         // Show the inforamtion one the page to edit
         [HttpPost]
@@ -308,8 +308,8 @@ namespace userdb.Controllers
         }
 
         [HttpGet]
-        [Route("users/edit")]
-        public IActionResult Edit()
+        [Route("users/EditProfile")]
+        public IActionResult EditProfile()
         {
             if (!IsUserLoggedIn()) return RedirectToAction("Login", "User");
 

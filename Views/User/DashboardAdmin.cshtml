@@ -19,7 +19,7 @@
         @foreach(var r in @ViewBag.Users) {
             <tr>
                 <td>@r.UserId</td>
-                <td><a asp-controller="User" asp-action="Show" asp-route-UserId="@r.UserId">@r.FullName</a></td>
+                <td><a asp-controller="Wall" asp-action="ShowUser" asp-route-UserId="@r.UserId">@r.FullName</a></td>
                 <td>@r.Email</td>
                 <td>@r.CreatedAt.ToString("MMM, dd yyyy")</td>
                 <td>@r.LevelString</td>
