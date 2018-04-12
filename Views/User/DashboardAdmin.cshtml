@@ -21,7 +21,7 @@
                 <td>@r.UserId</td>
                 <td><a asp-controller="User" asp-action="Show" asp-route-UserId="@r.UserId">@r.FullName</a></td>
                 <td>@r.Email</td>
-                <td>@r.CreatedAt</td>
+                <td>@r.CreatedAt.ToString("MMM, dd yyyy")</td>
                 <td>@r.LevelString</td>
                 <td>
                     <form action="/users/edit/@r.UserId" method="post">

@@ -23,6 +23,7 @@ namespace userdb.Controllers
         [Route("Register")]
         public IActionResult Index()
         {
+            if (IsUserLoggedIn()) return RedirectToAction("Dashboard", "User");
             return View("Register");
         }
 
@@ -120,6 +121,7 @@ namespace userdb.Controllers
         [Route("Login")]
         public IActionResult Login()
         {
+            if (IsUserLoggedIn()) return RedirectToAction("Dashboard", "User");
             return View("Login");
         }
 
@@ -163,6 +165,7 @@ namespace userdb.Controllers
         public IActionResult Dashboard()
         {
             if (!IsUserLoggedIn()) return RedirectToAction("Login", "User");
+            
             IEnumerable<User> AllUsers = _context.Users.OrderBy(r => r.FullName).ToList();
             User CurrentUser = _context.Users.SingleOrDefault(r => r.UserId == HttpContext.Session.GetInt32("UserId"));
             ViewBag.Users = AllUsers;
@@ -172,17 +175,6 @@ namespace userdb.Controllers
             return View("Dashboard");
         }
         
-        [HttpGet]
-        [Route("dashboard/admin")]
-        public IActionResult DashboardAdmin()
-        {
-            if (!IsUserLoggedIn()) return RedirectToAction("Login", "User");
-            IEnumerable<User> AllUsers = _context.Users.OrderBy(r => r.FullName).ToList();
-            // User CurrentUser = _context.Users.SingleOrDefault(r => r.UserId == HttpContext.Session.GetInt32("UserId"));
-            ViewBag.Users = AllUsers;
-            return View("DashboardAdmin");
-        }
-
         [HttpGet]
         [Route("users/show/{UserId}")]
         public IActionResult Show(int UserId)
@@ -194,15 +186,125 @@ namespace userdb.Controllers
             return View("Show");
         }
 
+        // Show the inforamtion one the page to edit
+        [HttpPost]
         [HttpGet]
         [Route("users/edit/{UserId}")]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(int UserId)
         {
             if (!IsUserLoggedIn()) return RedirectToAction("Login", "User");
 
             User EditUser = _context.Users.SingleOrDefault(r => r.UserId == UserId);
+            // ViewBag.User = EditUser;
+            UserInformationViewModel item = new UserInformationViewModel();
+            item.FirstName = EditUser.FirstName;
+            item.LastName = EditUser.LastName;
+            item.Email = EditUser.Email;
+            item.UserId = EditUser.UserId;
+            item.Level = EditUser.Level;
+
             ViewBag.User = EditUser;
-            return View("Edit");
+            // Using Partial ... @Html.Partial
+            ViewBag.Password = new UserPasswordViewModel();
+            ViewBag.ShowDescription = item.UserId == HttpContext.Session.GetInt32("UserId");
+            return View("Edit", item);
+        }
+
+        // Show the inforamtion one the page to edit
+        [HttpPost]
+        [Route("UpdateUser")]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateUser(UserInformationViewModel item)
+        {
+            if (_context.Users.Count() > 0) {
+                if(_context.Users.Any(r => 
+                    r.Email.ToLower() == item.Email.ToLower() 
+                    && r.UserId != item.UserId))
+                {
+                    ModelState.AddModelError("Email", "Email address already exists. Please enter a different email address.");
+                }
+            }
+            User EditUser = _context.Users.SingleOrDefault(r => r.UserId == item.UserId);
+            if(ModelState.IsValid)
+            {
+                EditUser.FirstName = item.FirstName;
+                EditUser.LastName = item.LastName;
+                EditUser.Email = item.Email;
+                EditUser.Level = item.Level;
+                EditUser.UpdatedAt = DateTime.Now;
+                _context.Users.Update(EditUser);
+                _context.SaveChanges();
+
+                return RedirectToAction("Dashboard");
+            }
+            ViewBag.User = EditUser;
+            // Using Partial ... @Html.Partial
+            ViewBag.Password = new UserPasswordViewModel();
+            ViewBag.ShowDescription = item.UserId == HttpContext.Session.GetInt32("UserId");
+            return View("Edit", item);
+        }
+
+        // Show the inforamtion one the page to edit
+        [HttpPost]
+        [Route("UpdatePassword")]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdatePassword(UserPasswordViewModel item)
+        {
+            User EditUser = _context.Users.SingleOrDefault(r => r.UserId == item.UserId);
+            if(ModelState.IsValid)
+            {
+                EditUser.Password = item.Password;
+                EditUser.UpdatedAt = DateTime.Now;
+
+                PasswordHasher<User> Hasher = new PasswordHasher<User>();
+                EditUser.Password = Hasher.HashPassword(EditUser, EditUser.Password);
+
+                _context.Users.Update(EditUser);
+                _context.SaveChanges();
+
+                return RedirectToAction("Dashboard");
+            }
+
+            ViewBag.User = EditUser;
+            UserInformationViewModel vUser = new UserInformationViewModel();
+
+            vUser.FirstName = EditUser.FirstName;
+            vUser.LastName = EditUser.LastName;
+            vUser.Email = EditUser.Email;
+            vUser.UserId = EditUser.UserId;
+            vUser.Level = EditUser.Level;
+            // Using Partial ... @Html.Partial
+            ViewBag.Password = new UserPasswordViewModel();
+            ViewBag.ShowDescription = item.UserId == HttpContext.Session.GetInt32("UserId");
+            return View("Edit", vUser);
+        }
+
+        [HttpPost]
+        [Route("Users/Delete/{UserId}")]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdatePassword(int UserId)
+        {
+            User EditUser = _context.Users.SingleOrDefault(r => r.UserId == UserId);
+            _context.Users.Remove(EditUser);
+            _context.SaveChanges();
+
+            return RedirectToAction("Dashboard");
+        }
+
+        [HttpPost]
+        [Route("Users/UpdateDescription")]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateDescription(string Description, int UserId)
+        {
+            User EditUser = _context.Users.SingleOrDefault(r => r.UserId == UserId);
+            EditUser.Description = Description;
+            EditUser.UpdatedAt = DateTime.Now;
+
+            _context.Users.Update(EditUser);
+            _context.SaveChanges();
+
+            return RedirectToAction("Dashboard");
         }
 
         [HttpGet]
@@ -212,8 +314,19 @@ namespace userdb.Controllers
             if (!IsUserLoggedIn()) return RedirectToAction("Login", "User");
 
             User EditUser = _context.Users.SingleOrDefault(r => r.UserId == HttpContext.Session.GetInt32("UserId"));
+            UserInformationViewModel item = new UserInformationViewModel();
+            item.FirstName = EditUser.FirstName;
+            item.LastName = EditUser.LastName;
+            item.Email = EditUser.Email;
+            item.UserId = EditUser.UserId;
+            item.Level = EditUser.Level;
+
             ViewBag.User = EditUser;
-            return View("Edit");
+            // Using Partial ... @Html.Partial
+            ViewBag.Password = new UserPasswordViewModel();
+            ViewBag.User = EditUser;
+            ViewBag.ShowDescription = item.UserId == HttpContext.Session.GetInt32("UserId");
+            return View("Edit", item);
         }
         private bool IsUserLoggedIn()
         {
