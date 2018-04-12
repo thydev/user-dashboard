@@ -32,5 +32,16 @@ namespace userdb.Models
             Comments = new List<Comment>();
         }
 
+        public string FullName { 
+            get {
+                return this.FirstName + " " + this.LastName;
+            }
+        }
+
+        public string LevelString {
+            get {
+                return this.Level == 1 ? "Admin" : "Normal";
+            }
+        }
     }
 }

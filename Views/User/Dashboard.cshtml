@@ -1,0 +1,31 @@
+
+@{
+    ViewData["Title"] = "Add a new cutomer";
+}
+
+<div class="wells wells-sm">
+    <h3>Manage Users</h3>
+    <div class="wells wells-sm">
+        <table class="table table-striped table-bordered">
+            <tr>
+                <td>ID</td>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Created At</th>
+                <th>User Level</th>
+
+            </tr>
+        @foreach(var r in @ViewBag.Users) {
+            <tr>
+                <td>@r.UserId</td>
+                <td>
+                    <a asp-controller="User" asp-action="Show" asp-route-UserId="@r.UserId">@r.FullName</a>
+                </td>
+                <td>@r.Email</td>
+                <td>@r.CreatedAt.ToString("MMM dd, yyyy ")</td>
+                <td>@r.LevelString</td>
+            </tr>
+        }
+        </table>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+
+@{
+    ViewData["Title"] = "Add a new cutomer";
+}
+
+<div class="wells wells-sm">
+    <h3>Manage Users</h3>
+    <a class="btn btn-primary" asp-controller="User" asp-action="New">Add new</a>
+    <div class="wells wells-sm">
+        <table class="table table-striped table-bordered">
+            <tr>
+                <td>ID</td>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Created At</th>
+                <th>User Level</th>
+                <th colspan="2" class="text-center">Actions</th>
+            </tr>
+        @foreach(var r in @ViewBag.Users) {
+            <tr>
+                <td>@r.UserId</td>
+                <td><a asp-controller="User" asp-action="Show" asp-route-UserId="@r.UserId">@r.FullName</a></td>
+                <td>@r.Email</td>
+                <td>@r.CreatedAt</td>
+                <td>@r.LevelString</td>
+                <td>
+                    <form action="/users/edit/@r.UserId" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-link ">Edit</button>
+                    </form>
+                    
+                </td>
+                <td>
+                    <form action="/Users/Delete/@r.UserId" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-link ">Remove</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </table>
+    </div>
+</div>
